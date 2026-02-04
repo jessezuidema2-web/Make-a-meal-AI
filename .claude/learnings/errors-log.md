@@ -4,6 +4,27 @@ Dit bestand houdt fouten bij die ik heb gemaakt zodat ik ervan kan leren.
 
 ---
 
+## 2024-02-04: Carnivore Tag Fix (KRITIEKE FOUT)
+
+### Fout 5: Verkeerde tag definities - CARNIVORE met eieren
+**Probleem:** Recepten met eieren hadden de 'carnivore' tag, maar carnivore dieet = ALLEEN VLEES.
+**Voorbeelden die FOUT waren:**
+- "Prosciutto & Eggs" - bevat eieren
+- "Steak & Eggs" - bevat eieren
+- "Bacon Egg Cups" - bevat eieren
+- "Chorizo & Eggs" - bevat eieren
+**Oorzaak:** Niet goed nagedacht over wat 'carnivore' betekent. Eieren zijn NIET vlees.
+**Oplossing:**
+1. 'carnivore' tag verwijderd van alle recepten met eieren
+2. 6 nieuwe PURE VLEES ontbijt recepten toegevoegd
+**Les:** BIJ ELKE TAG: controleer of het recept ECHT aan de definitie voldoet:
+- carnivore = ALLEEN vlees/vis, geen eieren, geen zuivel, geen groenten
+- vegan = geen dierlijke producten
+- spicy = moet pittig zijn
+- sweet = moet zoet zijn
+
+---
+
 ## 2024-02-04: DiscoverScreen Recipe Fixes
 
 ### Fout 1: Dubbele Unsplash URLs
