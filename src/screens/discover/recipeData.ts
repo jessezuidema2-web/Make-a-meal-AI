@@ -140,6 +140,17 @@ const ITALIAN_RECIPES: DiscoverRecipe[] = [
 
   // ITALIAN - SNACK SPICY - 2 more (Spicy Chocolate Budino, Nduja, Sausage Sub, Calabrese Salami above also count)
   { name: 'Spicy Arrabbiata Bruschetta', description: 'Toasted bread with fiery arrabbiata sauce, chili flakes & fresh basil', calories: 190, protein: 4, carbs: 28, fat: 8, time: 10, tags: ['italian', 'snack', 'spicy', 'vegan', 'quick', 'cutting'], image: 'https://images.unsplash.com/photo-1590412200988-a436970781fa?w=400&h=400&fit=crop' },
+
+  // ITALIAN - HIGH-PROTEIN + SWEET (fills high-protein + sweet + italian gap)
+  { name: 'Ricotta Protein Cheesecake', description: 'High-protein Italian cheesecake with fresh ricotta, Greek yogurt & vanilla', calories: 340, protein: 28, carbs: 32, fat: 12, time: 25, tags: ['italian', 'sweet', 'snack', 'high-protein', 'cutting'], image: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=400&h=400&fit=crop' },
+  { name: 'Protein Tiramisu Cups', description: 'Layered espresso mascarpone dessert with whey protein & cocoa', calories: 340, protein: 26, carbs: 28, fat: 14, time: 20, tags: ['italian', 'sweet', 'snack', 'high-protein', 'cutting'], image: 'https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?w=400&h=400&fit=crop' },
+
+  // ITALIAN - HIGH-PROTEIN + SWEET + QUICK (fills high-protein + sweet + quick + italian gap)
+  { name: 'Quick Ricotta Honey Bowl', description: 'Fresh ricotta with raw honey, walnuts & cinnamon', calories: 310, protein: 26, carbs: 24, fat: 14, time: 5, tags: ['italian', 'sweet', 'snack', 'breakfast', 'high-protein', 'quick', 'cutting'], image: 'https://images.unsplash.com/photo-1488477181946-6428a0291777?w=400&h=400&fit=crop' },
+
+  // ITALIAN - VEGAN + HIGH-PROTEIN (fills vegan + high-protein + italian gap)
+  { name: 'Italian White Bean Stew', description: 'Tuscan cannellini bean stew with rosemary, tomatoes & kale', calories: 380, protein: 26, carbs: 48, fat: 10, time: 25, tags: ['italian', 'lunch', 'dinner', 'vegan', 'high-protein', 'pre-workout', 'cutting'], image: 'https://images.unsplash.com/photo-1547592166-23ac45744acd?w=400&h=400&fit=crop' },
+  { name: 'Lentil Bolognese', description: 'Hearty lentil ragu over whole wheat pasta with nutritional yeast', calories: 420, protein: 28, carbs: 58, fat: 8, time: 30, tags: ['italian', 'lunch', 'dinner', 'vegan', 'high-protein', 'pre-workout'], image: 'https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?w=400&h=400&fit=crop' },
 ];
 
 // ============================================================================
@@ -262,6 +273,17 @@ const ASIAN_RECIPES: DiscoverRecipe[] = [
 
   // ASIAN - DINNER QUICK - 1 more
   { name: 'Quick Chicken Teriyaki Bowl', description: 'Sliced chicken thigh in teriyaki sauce over steamed rice', calories: 480, protein: 30, carbs: 52, fat: 16, time: 12, tags: ['asian', 'dinner', 'lunch', 'quick', 'high-protein', 'pre-workout', 'bulking'], image: 'https://images.unsplash.com/photo-1569058242252-623df46b5025?w=400&h=400&fit=crop' },
+
+  // ASIAN - HIGH-PROTEIN + SWEET (fills high-protein + sweet + asian gap)
+  { name: 'Protein Mochi Bites', description: 'Chewy rice mochi with protein-enriched sweet red bean filling', calories: 300, protein: 26, carbs: 36, fat: 6, time: 20, tags: ['asian', 'sweet', 'snack', 'high-protein', 'cutting'], image: 'https://images.unsplash.com/photo-1606312619070-d48b4c652a52?w=400&h=400&fit=crop' },
+  { name: 'Sweet Silken Tofu Dessert', description: 'Chilled silken tofu with ginger syrup, sesame & honey', calories: 290, protein: 26, carbs: 28, fat: 8, time: 10, tags: ['asian', 'sweet', 'snack', 'high-protein', 'quick', 'cutting'], image: 'https://images.unsplash.com/photo-1563805042-7684c019e1cb?w=400&h=400&fit=crop' },
+
+  // ASIAN - HIGH-PROTEIN + SWEET + QUICK (fills high-protein + sweet + quick + asian gap)
+  { name: 'Protein Matcha Smoothie Bowl', description: 'Thick matcha smoothie bowl with Greek yogurt, protein powder & banana', calories: 340, protein: 30, carbs: 38, fat: 8, time: 5, tags: ['asian', 'sweet', 'snack', 'breakfast', 'high-protein', 'quick', 'cutting', 'pre-workout'], image: 'https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=400&h=400&fit=crop' },
+
+  // ASIAN - VEGAN + HIGH-PROTEIN (fills vegan + high-protein + asian gap)
+  { name: 'Mapo Tofu Power Bowl', description: 'Firm tofu in spicy Sichuan sauce with edamame over brown rice', calories: 420, protein: 32, carbs: 42, fat: 14, time: 20, tags: ['asian', 'lunch', 'dinner', 'vegan', 'high-protein', 'spicy', 'pre-workout'], image: 'https://images.unsplash.com/photo-1617093727343-374698b1b08d?w=400&h=400&fit=crop' },
+  { name: 'Tempeh Teriyaki Bowl', description: 'Grilled tempeh in teriyaki glaze with steamed vegetables & quinoa', calories: 460, protein: 34, carbs: 46, fat: 16, time: 20, tags: ['asian', 'lunch', 'dinner', 'vegan', 'high-protein', 'pre-workout'], image: 'https://images.unsplash.com/photo-1512058564366-18510be2db19?w=400&h=400&fit=crop' },
 ];
 
 // ============================================================================
@@ -397,6 +419,17 @@ const MIDDLE_EASTERN_RECIPES: DiscoverRecipe[] = [
   // MIDDLE EASTERN - SNACK SPICY (fills snack+spicy+middle_eastern)
   { name: 'Harissa Roasted Chickpeas', description: 'Crunchy roasted chickpeas tossed with harissa & cumin', calories: 240, protein: 12, carbs: 34, fat: 8, time: 25, tags: ['middle_eastern', 'snack', 'spicy', 'vegan', 'cutting'], image: 'https://images.unsplash.com/photo-1473093295043-cdd812d0e601?w=400&h=400&fit=crop' },
   { name: 'Spicy Muhammara Dip', description: 'Fiery roasted red pepper & walnut dip with extra Aleppo pepper', calories: 240, protein: 6, carbs: 18, fat: 18, time: 15, tags: ['middle_eastern', 'snack', 'spicy', 'vegan', 'quick', 'cutting'], image: 'https://images.unsplash.com/photo-1432139555190-58524dae6a55?w=400&h=400&fit=crop' },
+
+  // MIDDLE EASTERN - HIGH-PROTEIN + SWEET (fills high-protein + sweet + middle_eastern gap)
+  { name: 'Protein Halva Bites', description: 'Tahini halva enriched with protein powder, pistachios & honey', calories: 340, protein: 26, carbs: 28, fat: 14, time: 10, tags: ['middle_eastern', 'sweet', 'snack', 'high-protein', 'quick', 'cutting'], image: 'https://images.unsplash.com/photo-1550304943-4f24f54ddde9?w=400&h=400&fit=crop' },
+  { name: 'Greek Yogurt Honey Nut Bowl', description: 'Thick Greek yogurt with raw honey, almonds, pistachios & dates', calories: 340, protein: 28, carbs: 34, fat: 12, time: 5, tags: ['middle_eastern', 'sweet', 'snack', 'breakfast', 'high-protein', 'quick', 'cutting'], image: 'https://images.unsplash.com/photo-1488477181946-6428a0291777?w=400&h=400&fit=crop' },
+
+  // MIDDLE EASTERN - HIGH-PROTEIN + SWEET + QUICK (fills high-protein + sweet + quick + middle_eastern gap)
+  { name: 'Quick Labneh Date Bowl', description: 'Thick strained labneh with Medjool dates, walnuts & honey drizzle', calories: 300, protein: 26, carbs: 30, fat: 10, time: 5, tags: ['middle_eastern', 'sweet', 'snack', 'breakfast', 'high-protein', 'quick', 'cutting'], image: 'https://images.unsplash.com/photo-1540914124281-342587941389?w=400&h=400&fit=crop' },
+
+  // MIDDLE EASTERN - VEGAN + HIGH-PROTEIN (fills vegan + high-protein + middle_eastern gap)
+  { name: 'Chickpea Shawarma Bowl', description: 'Spiced roasted chickpeas with tahini, pickled turnips & tabbouleh', calories: 420, protein: 26, carbs: 52, fat: 14, time: 25, tags: ['middle_eastern', 'lunch', 'dinner', 'vegan', 'high-protein', 'pre-workout'], image: 'https://images.unsplash.com/photo-1558005137-d9619a5c539f?w=400&h=400&fit=crop' },
+  { name: 'Lentil Mujaddara Power Bowl', description: 'Brown lentils with rice, crispy onions & topped with hemp seeds', calories: 440, protein: 28, carbs: 58, fat: 10, time: 30, tags: ['middle_eastern', 'lunch', 'dinner', 'vegan', 'high-protein', 'pre-workout'], image: 'https://images.unsplash.com/photo-1505576399279-565b52d4ac71?w=400&h=400&fit=crop' },
 ];
 
 // ============================================================================
@@ -511,6 +544,17 @@ const MEXICAN_RECIPES: DiscoverRecipe[] = [
   // MEXICAN - SNACK SPICY (fills snack+spicy+mexican)
   { name: 'Jalapeño Poppers', description: 'Stuffed jalapeños with cream cheese, breaded & fried', calories: 320, protein: 10, carbs: 24, fat: 22, time: 15, tags: ['mexican', 'snack', 'spicy', 'quick'], image: 'https://images.unsplash.com/photo-1574484284002-952d92456975?w=400&h=400&fit=crop' },
   { name: 'Spicy Pepita Mix', description: 'Toasted pumpkin seeds with habanero chili & lime salt', calories: 280, protein: 12, carbs: 14, fat: 22, time: 10, tags: ['mexican', 'snack', 'spicy', 'vegan', 'quick', 'cutting'], image: 'https://images.unsplash.com/photo-1576402187878-974f70c890a5?w=400&h=400&fit=crop' },
+
+  // MEXICAN - HIGH-PROTEIN + SWEET (fills high-protein + sweet + mexican gap)
+  { name: 'Protein Churro Bites', description: 'Baked churro bites with protein powder, cinnamon & Greek yogurt dip', calories: 320, protein: 28, carbs: 36, fat: 8, time: 20, tags: ['mexican', 'sweet', 'snack', 'high-protein', 'cutting'], image: 'https://images.unsplash.com/photo-1470124182917-cc6e71b22ecc?w=400&h=400&fit=crop' },
+  { name: 'Sweet Protein Horchata Bowl', description: 'Rice milk horchata with protein powder, cinnamon & toasted almonds', calories: 340, protein: 30, carbs: 38, fat: 8, time: 10, tags: ['mexican', 'sweet', 'snack', 'breakfast', 'high-protein', 'quick', 'pre-workout'], image: 'https://images.unsplash.com/photo-1553530666-ba11a7da3888?w=400&h=400&fit=crop' },
+
+  // MEXICAN - HIGH-PROTEIN + SWEET + QUICK (fills high-protein + sweet + quick + mexican gap)
+  { name: 'Protein Chocolate Avocado Mousse', description: 'Creamy avocado mousse with cocoa, protein powder & honey', calories: 325, protein: 26, carbs: 24, fat: 14, time: 10, tags: ['mexican', 'sweet', 'snack', 'high-protein', 'quick', 'cutting'], image: 'https://images.unsplash.com/photo-1551024601-bec78aea704b?w=400&h=400&fit=crop' },
+
+  // MEXICAN - VEGAN + HIGH-PROTEIN (fills vegan + high-protein + mexican gap)
+  { name: 'Black Bean Protein Bowl', description: 'Seasoned black beans with quinoa, avocado, salsa & pepitas', calories: 440, protein: 28, carbs: 52, fat: 14, time: 20, tags: ['mexican', 'lunch', 'dinner', 'vegan', 'high-protein', 'pre-workout'], image: 'https://images.unsplash.com/photo-1543339308-43e59d6b73a6?w=400&h=400&fit=crop' },
+  { name: 'Tempeh Taco Bowl', description: 'Spiced crumbled tempeh with pinto beans, corn salsa & guacamole', calories: 480, protein: 34, carbs: 48, fat: 18, time: 20, tags: ['mexican', 'lunch', 'dinner', 'vegan', 'high-protein', 'spicy', 'pre-workout'], image: 'https://images.unsplash.com/photo-1476224203421-9ac39bcb3327?w=400&h=400&fit=crop' },
 ];
 
 // ============================================================================

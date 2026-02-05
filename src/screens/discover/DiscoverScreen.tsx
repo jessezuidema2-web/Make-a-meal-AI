@@ -3,7 +3,7 @@ import {
   View,
   Text,
   ScrollView,
-  TouchableOpacity,
+  Pressable,
   StyleSheet,
   FlatList,
   Image,
@@ -54,23 +54,27 @@ const CUISINE_IDS = new Set(CUISINES.map(c => c.id));
 
 type RecipeItem = DiscoverRecipe;
 
-// Memoized components for performance
+// Memoized components for performance - using Pressable for instant response
 const MealTypeCard = memo(({ item, isActive, onPress }: {
   item: typeof MEAL_TYPES[0];
   isActive: boolean;
   onPress: () => void;
 }) => (
-  <TouchableOpacity
-    style={[styles.mealTypeCard, isActive && styles.mealTypeCardActive]}
+  <Pressable
+    style={({ pressed }) => [
+      styles.mealTypeCard,
+      isActive && styles.mealTypeCardActive,
+      pressed && styles.pressed,
+    ]}
     onPress={onPress}
-    activeOpacity={0.7}
+    delayLongPress={200}
   >
     <Image source={{ uri: item.image }} style={styles.mealTypeImage} />
     <View style={[styles.mealTypeOverlay, isActive && styles.mealTypeOverlayActive]}>
       <Text style={styles.mealTypeEmoji}>{item.emoji}</Text>
       <Text style={styles.mealTypeLabel}>{item.label}</Text>
     </View>
-  </TouchableOpacity>
+  </Pressable>
 ));
 
 const GoalCard = memo(({ item, isActive, onPress }: {
@@ -78,14 +82,18 @@ const GoalCard = memo(({ item, isActive, onPress }: {
   isActive: boolean;
   onPress: () => void;
 }) => (
-  <TouchableOpacity
-    style={[styles.goalCard, isActive && styles.goalCardActive]}
+  <Pressable
+    style={({ pressed }) => [
+      styles.goalCard,
+      isActive && styles.goalCardActive,
+      pressed && styles.pressed,
+    ]}
     onPress={onPress}
-    activeOpacity={0.7}
+    delayLongPress={200}
   >
     <Text style={styles.goalEmoji}>{item.emoji}</Text>
     <Text style={styles.goalLabel}>{item.label}</Text>
-  </TouchableOpacity>
+  </Pressable>
 ));
 
 const CuisineCard = memo(({ item, isActive, onPress }: {
@@ -93,26 +101,33 @@ const CuisineCard = memo(({ item, isActive, onPress }: {
   isActive: boolean;
   onPress: () => void;
 }) => (
-  <TouchableOpacity
-    style={[styles.cuisineCard, isActive && styles.cuisineCardActive]}
+  <Pressable
+    style={({ pressed }) => [
+      styles.cuisineCard,
+      isActive && styles.cuisineCardActive,
+      pressed && styles.pressed,
+    ]}
     onPress={onPress}
-    activeOpacity={0.7}
+    delayLongPress={200}
   >
     <Image source={{ uri: item.image }} style={styles.cuisineImage} />
     <View style={[styles.cuisineOverlay, isActive && styles.cuisineOverlayActive]}>
       <Text style={styles.cuisineLabel}>{item.label}</Text>
     </View>
-  </TouchableOpacity>
+  </Pressable>
 ));
 
 const RecipeCard = memo(({ recipe, onPress }: {
   recipe: RecipeItem;
   onPress: () => void;
 }) => (
-  <TouchableOpacity
-    style={styles.resultCard}
+  <Pressable
+    style={({ pressed }) => [
+      styles.resultCard,
+      pressed && styles.pressed,
+    ]}
     onPress={onPress}
-    activeOpacity={0.7}
+    delayLongPress={200}
   >
     <Image source={{ uri: recipe.image }} style={styles.resultImage} />
     <View style={styles.resultInfo}>
@@ -129,7 +144,7 @@ const RecipeCard = memo(({ recipe, onPress }: {
       </View>
       <Text style={styles.resultTime}>{recipe.time} min</Text>
     </View>
-  </TouchableOpacity>
+  </Pressable>
 ));
 
 export const DiscoverScreen = ({ navigation }: any) => {
@@ -296,14 +311,14 @@ export const DiscoverScreen = ({ navigation }: any) => {
                 {activeLabels.map((label, i) => (
                   <View key={i} style={styles.activeTag}>
                     <Text style={styles.activeTagText}>{label}</Text>
-                    <TouchableOpacity onPress={() => toggleFilter(Array.from(activeFilters)[i])}>
+                    <Pressable onPress={() => toggleFilter(Array.from(activeFilters)[i])}>
                       <Text style={styles.activeTagRemove}>{'\u00D7'}</Text>
-                    </TouchableOpacity>
+                    </Pressable>
                   </View>
                 ))}
-                <TouchableOpacity onPress={clearAllFilters} style={styles.clearAllButton}>
+                <Pressable onPress={clearAllFilters} style={styles.clearAllButton}>
                   <Text style={styles.clearText}>Clear all</Text>
-                </TouchableOpacity>
+                </Pressable>
               </View>
             </View>
 
@@ -344,9 +359,8 @@ export const DiscoverScreen = ({ navigation }: any) => {
           style={styles.modalContainer}
         >
           <View style={styles.modalBackdrop}>
-            <TouchableOpacity
+            <Pressable
               style={styles.modalBackdropTouchable}
-              activeOpacity={1}
               onPress={() => setSelectedRecipe(null)}
             />
             <View style={styles.modalContent}>
@@ -388,8 +402,11 @@ export const DiscoverScreen = ({ navigation }: any) => {
                     </View>
                     <Text style={styles.modalTime}>{selectedRecipe.time} min prep time</Text>
 
-                    <TouchableOpacity
-                      style={styles.addToTrackerButton}
+                    <Pressable
+                      style={({ pressed }) => [
+                        styles.addToTrackerButton,
+                        pressed && styles.pressed,
+                      ]}
                       onPress={handleAddToTracker}
                       disabled={isAdding}
                     >
@@ -398,14 +415,17 @@ export const DiscoverScreen = ({ navigation }: any) => {
                       ) : (
                         <Text style={styles.addToTrackerText}>Add to Tracker</Text>
                       )}
-                    </TouchableOpacity>
+                    </Pressable>
 
-                    <TouchableOpacity
-                      style={styles.modalCloseButton}
+                    <Pressable
+                      style={({ pressed }) => [
+                        styles.modalCloseButton,
+                        pressed && styles.pressed,
+                      ]}
                       onPress={() => setSelectedRecipe(null)}
                     >
                       <Text style={styles.modalCloseText}>Close</Text>
-                    </TouchableOpacity>
+                    </Pressable>
                   </View>
                 </>
               )}
@@ -421,6 +441,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.white,
+  },
+  pressed: {
+    opacity: 0.7,
+    transform: [{ scale: 0.98 }],
   },
   header: {
     padding: spacing.lg,
