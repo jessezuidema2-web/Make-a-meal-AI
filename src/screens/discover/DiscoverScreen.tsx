@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback, memo, useTransition } from 'react';
+import React, { useState, useMemo, useCallback, memo, useDeferredValue } from 'react';
 import {
   View,
   Text,
@@ -11,7 +11,6 @@ import {
   KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
-  InteractionManager,
 } from 'react-native';
 import { colors, typography, spacing, borders, shadows } from '../../constants/designSystem';
 import { useAuth } from '../../contexts/AuthContext';
@@ -157,41 +156,41 @@ const RecipeCard = memo(({ recipe, onPress }: {
 
 export const DiscoverScreen = ({ navigation }: any) => {
   const { user } = useAuth();
-  const [activeFilters, setActiveFilters] = useState<Set<string>>(new Set());
+  // Use array for filters - easier re-render detection than Set
+  const [activeFiltersArray, setActiveFiltersArray] = useState<string[]>([]);
   const [selectedRecipe, setSelectedRecipe] = useState<IndexedRecipe | null>(null);
   const [isAdding, setIsAdding] = useState(false);
-  const [isPending, startTransition] = useTransition();
+
+  // Convert to Set for O(1) lookups in UI
+  const activeFilters = useMemo(() => new Set(activeFiltersArray), [activeFiltersArray]);
+
+  // Defer the filter value for expensive computations - UI updates immediately
+  const deferredFilters = useDeferredValue(activeFilters);
 
   const toggleFilter = useCallback((key: string) => {
-    // Update UI immediately, defer expensive filtering
-    startTransition(() => {
-      setActiveFilters(prev => {
-        const next = new Set(prev);
-        if (next.has(key)) {
-          next.delete(key);
-        } else {
-          next.add(key);
-        }
-        return next;
-      });
+    // Instant state update - UI reflects immediately
+    setActiveFiltersArray(prev => {
+      if (prev.includes(key)) {
+        return prev.filter(k => k !== key);
+      } else {
+        return [...prev, key];
+      }
     });
   }, []);
 
   const clearAllFilters = useCallback(() => {
-    startTransition(() => {
-      setActiveFilters(new Set());
-    });
+    setActiveFiltersArray([]);
   }, []);
 
-  // Filter recipes: cuisines use OR logic (union), other filters use AND (intersection)
-  // Optimized with pre-indexed Set-based lookups for O(1) tag checking
+  // Filter recipes using DEFERRED filters - allows UI to update instantly
+  // while expensive filtering happens in background
   const results = useMemo(() => {
-    if (activeFilters.size === 0) return [];
+    if (deferredFilters.size === 0) return [];
 
     // Separate cuisine filters from other filters
     const cuisineFilters: string[] = [];
     const otherFilters: string[] = [];
-    activeFilters.forEach(tag => {
+    deferredFilters.forEach(tag => {
       if (CUISINE_IDS.has(tag)) {
         cuisineFilters.push(tag);
       } else {
@@ -218,20 +217,20 @@ export const DiscoverScreen = ({ navigation }: any) => {
     });
 
     // Sort by relevance based on active goal filters
-    if (activeFilters.has('high-protein')) {
+    if (deferredFilters.has('high-protein')) {
       filtered.sort((a, b) => b.protein - a.protein);
-    } else if (activeFilters.has('cutting')) {
+    } else if (deferredFilters.has('cutting')) {
       filtered.sort((a, b) => a.calories - b.calories);
-    } else if (activeFilters.has('bulking')) {
+    } else if (deferredFilters.has('bulking')) {
       filtered.sort((a, b) => b.calories - a.calories);
-    } else if (activeFilters.has('pre-workout')) {
+    } else if (deferredFilters.has('pre-workout')) {
       filtered.sort((a, b) => b.carbs - a.carbs);
-    } else if (activeFilters.has('quick')) {
+    } else if (deferredFilters.has('quick')) {
       filtered.sort((a, b) => a.time - b.time);
     }
 
     return filtered;
-  }, [activeFilters]);
+  }, [deferredFilters]);
 
   const activeLabels = useMemo(() => {
     return Array.from(activeFilters).map(key => TAG_LABELS[key] || key);
@@ -277,7 +276,7 @@ export const DiscoverScreen = ({ navigation }: any) => {
             data={MEAL_TYPES}
             keyExtractor={item => item.id}
             contentContainerStyle={styles.carouselContent}
-            extraData={activeFilters}
+            extraData={activeFiltersArray}
             renderItem={({ item }) => (
               <MealTypeCard
                 item={item}
@@ -312,7 +311,7 @@ export const DiscoverScreen = ({ navigation }: any) => {
             data={CUISINES}
             keyExtractor={item => item.id}
             contentContainerStyle={styles.carouselContent}
-            extraData={activeFilters}
+            extraData={activeFiltersArray}
             renderItem={({ item }) => (
               <CuisineCard
                 item={item}
@@ -324,7 +323,7 @@ export const DiscoverScreen = ({ navigation }: any) => {
         </View>
 
         {/* Results */}
-        {activeFilters.size > 0 && (
+        {activeFiltersArray.length > 0 && (
           <View style={styles.section}>
             <View style={styles.resultsHeader}>
               <View style={styles.activeTagsRow}>
