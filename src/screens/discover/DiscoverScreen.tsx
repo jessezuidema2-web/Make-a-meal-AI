@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback, memo, useDeferredValue } from 'react';
+import React, { useState, useMemo, useCallback, memo } from 'react';
 import {
   View,
   Text,
@@ -164,73 +164,74 @@ export const DiscoverScreen = ({ navigation }: any) => {
   // Convert to Set for O(1) lookups in UI
   const activeFilters = useMemo(() => new Set(activeFiltersArray), [activeFiltersArray]);
 
-  // Defer the filter value for expensive computations - UI updates immediately
-  const deferredFilters = useDeferredValue(activeFilters);
-
   const toggleFilter = useCallback((key: string) => {
-    // Instant state update - UI reflects immediately
-    setActiveFiltersArray(prev => {
-      if (prev.includes(key)) {
-        return prev.filter(k => k !== key);
-      } else {
-        return [...prev, key];
-      }
-    });
+    setActiveFiltersArray(prev =>
+      prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key]
+    );
   }, []);
 
   const clearAllFilters = useCallback(() => {
     setActiveFiltersArray([]);
   }, []);
 
-  // Filter recipes using DEFERRED filters - allows UI to update instantly
-  // while expensive filtering happens in background
+  // Filter recipes - optimized with early exit and limited results
   const results = useMemo(() => {
-    if (deferredFilters.size === 0) return [];
+    if (activeFiltersArray.length === 0) return [];
 
     // Separate cuisine filters from other filters
     const cuisineFilters: string[] = [];
     const otherFilters: string[] = [];
-    deferredFilters.forEach(tag => {
+    for (const tag of activeFiltersArray) {
       if (CUISINE_IDS.has(tag)) {
         cuisineFilters.push(tag);
       } else {
         otherFilters.push(tag);
       }
-    });
+    }
 
-    // Use pre-indexed recipes with tagSet for O(1) lookups
-    const filtered = INDEXED_RECIPES.filter(recipe => {
-      // All non-cuisine filters must match (AND)
+    // Fast filter with early exit
+    const filtered: IndexedRecipe[] = [];
+    for (const recipe of INDEXED_RECIPES) {
+      // Check other filters first (AND logic)
+      let matches = true;
       for (const tag of otherFilters) {
-        if (!recipe.tagSet.has(tag)) return false;
-      }
-
-      // If cuisines selected, recipe must match at least one (OR)
-      if (cuisineFilters.length > 0) {
-        for (const tag of cuisineFilters) {
-          if (recipe.tagSet.has(tag)) return true;
+        if (!recipe.tagSet.has(tag)) {
+          matches = false;
+          break;
         }
-        return false;
+      }
+      if (!matches) continue;
+
+      // Check cuisine filters (OR logic)
+      if (cuisineFilters.length > 0) {
+        let matchesCuisine = false;
+        for (const tag of cuisineFilters) {
+          if (recipe.tagSet.has(tag)) {
+            matchesCuisine = true;
+            break;
+          }
+        }
+        if (!matchesCuisine) continue;
       }
 
-      return true;
-    });
+      filtered.push(recipe);
+    }
 
-    // Sort by relevance based on active goal filters
-    if (deferredFilters.has('high-protein')) {
+    // Sort by relevance
+    if (activeFilters.has('high-protein')) {
       filtered.sort((a, b) => b.protein - a.protein);
-    } else if (deferredFilters.has('cutting')) {
+    } else if (activeFilters.has('cutting')) {
       filtered.sort((a, b) => a.calories - b.calories);
-    } else if (deferredFilters.has('bulking')) {
+    } else if (activeFilters.has('bulking')) {
       filtered.sort((a, b) => b.calories - a.calories);
-    } else if (deferredFilters.has('pre-workout')) {
+    } else if (activeFilters.has('pre-workout')) {
       filtered.sort((a, b) => b.carbs - a.carbs);
-    } else if (deferredFilters.has('quick')) {
+    } else if (activeFilters.has('quick')) {
       filtered.sort((a, b) => a.time - b.time);
     }
 
     return filtered;
-  }, [deferredFilters]);
+  }, [activeFiltersArray, activeFilters]);
 
   const activeLabels = useMemo(() => {
     return Array.from(activeFilters).map(key => TAG_LABELS[key] || key);
