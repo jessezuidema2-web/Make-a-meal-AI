@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback, memo } from 'react';
+import React, { useState, useMemo, useCallback, memo, useTransition } from 'react';
 import {
   View,
   Text,
@@ -11,11 +11,19 @@ import {
   KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
+  InteractionManager,
 } from 'react-native';
 import { colors, typography, spacing, borders, shadows } from '../../constants/designSystem';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../config/supabase';
 import { ALL_RECIPES, DiscoverRecipe } from './recipeData';
+
+// Pre-index recipe tags as Sets for O(1) lookup during filtering
+const INDEXED_RECIPES = ALL_RECIPES.map(recipe => ({
+  ...recipe,
+  tagSet: new Set(recipe.tags),
+}));
+type IndexedRecipe = typeof INDEXED_RECIPES[0];
 
 const MEAL_TYPES = [
   { id: 'breakfast', label: 'Breakfast', emoji: '\uD83C\uDF73', image: 'https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?w=200&h=200&fit=crop' },
@@ -118,7 +126,7 @@ const CuisineCard = memo(({ item, isActive, onPress }: {
 ));
 
 const RecipeCard = memo(({ recipe, onPress }: {
-  recipe: RecipeItem;
+  recipe: IndexedRecipe;
   onPress: () => void;
 }) => (
   <Pressable
@@ -150,26 +158,33 @@ const RecipeCard = memo(({ recipe, onPress }: {
 export const DiscoverScreen = ({ navigation }: any) => {
   const { user } = useAuth();
   const [activeFilters, setActiveFilters] = useState<Set<string>>(new Set());
-  const [selectedRecipe, setSelectedRecipe] = useState<RecipeItem | null>(null);
+  const [selectedRecipe, setSelectedRecipe] = useState<IndexedRecipe | null>(null);
   const [isAdding, setIsAdding] = useState(false);
+  const [isPending, startTransition] = useTransition();
 
   const toggleFilter = useCallback((key: string) => {
-    setActiveFilters(prev => {
-      const next = new Set(prev);
-      if (next.has(key)) {
-        next.delete(key);
-      } else {
-        next.add(key);
-      }
-      return next;
+    // Update UI immediately, defer expensive filtering
+    startTransition(() => {
+      setActiveFilters(prev => {
+        const next = new Set(prev);
+        if (next.has(key)) {
+          next.delete(key);
+        } else {
+          next.add(key);
+        }
+        return next;
+      });
     });
   }, []);
 
   const clearAllFilters = useCallback(() => {
-    setActiveFilters(new Set());
+    startTransition(() => {
+      setActiveFilters(new Set());
+    });
   }, []);
 
   // Filter recipes: cuisines use OR logic (union), other filters use AND (intersection)
+  // Optimized with pre-indexed Set-based lookups for O(1) tag checking
   const results = useMemo(() => {
     if (activeFilters.size === 0) return [];
 
@@ -184,14 +199,19 @@ export const DiscoverScreen = ({ navigation }: any) => {
       }
     });
 
-    const filtered = ALL_RECIPES.filter(recipe => {
+    // Use pre-indexed recipes with tagSet for O(1) lookups
+    const filtered = INDEXED_RECIPES.filter(recipe => {
       // All non-cuisine filters must match (AND)
-      const matchesOther = otherFilters.every(tag => recipe.tags.includes(tag));
-      if (!matchesOther) return false;
+      for (const tag of otherFilters) {
+        if (!recipe.tagSet.has(tag)) return false;
+      }
 
       // If cuisines selected, recipe must match at least one (OR)
       if (cuisineFilters.length > 0) {
-        return cuisineFilters.some(tag => recipe.tags.includes(tag));
+        for (const tag of cuisineFilters) {
+          if (recipe.tagSet.has(tag)) return true;
+        }
+        return false;
       }
 
       return true;
@@ -327,13 +347,26 @@ export const DiscoverScreen = ({ navigation }: any) => {
             </Text>
 
             {results.length > 0 ? (
-              results.map((recipe, index) => (
-                <RecipeCard
-                  key={`${recipe.name}-${index}`}
-                  recipe={recipe}
-                  onPress={() => setSelectedRecipe(recipe)}
-                />
-              ))
+              <FlatList
+                data={results}
+                keyExtractor={(item, index) => `${item.name}-${index}`}
+                renderItem={({ item }) => (
+                  <RecipeCard
+                    recipe={item}
+                    onPress={() => setSelectedRecipe(item)}
+                  />
+                )}
+                scrollEnabled={false}
+                initialNumToRender={5}
+                maxToRenderPerBatch={5}
+                windowSize={3}
+                removeClippedSubviews={true}
+                getItemLayout={(_, index) => ({
+                  length: 100,
+                  offset: 100 * index,
+                  index,
+                })}
+              />
             ) : (
               <View style={styles.emptyResults}>
                 <Text style={styles.emptyEmoji}>{'\uD83D\uDD0D'}</Text>
