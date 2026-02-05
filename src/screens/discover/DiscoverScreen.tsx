@@ -343,30 +343,17 @@ export const DiscoverScreen = ({ navigation }: any) => {
             </View>
 
             <Text style={styles.resultCount}>
-              {results.length} recipe{results.length !== 1 ? 's' : ''} found
+              {results.length > 20 ? `Showing 20 of ${results.length}` : results.length} recipe{results.length !== 1 ? 's' : ''} found
             </Text>
 
             {results.length > 0 ? (
-              <FlatList
-                data={results}
-                keyExtractor={(item, index) => `${item.name}-${index}`}
-                renderItem={({ item }) => (
-                  <RecipeCard
-                    recipe={item}
-                    onPress={() => setSelectedRecipe(item)}
-                  />
-                )}
-                scrollEnabled={false}
-                initialNumToRender={5}
-                maxToRenderPerBatch={5}
-                windowSize={3}
-                removeClippedSubviews={true}
-                getItemLayout={(_, index) => ({
-                  length: 100,
-                  offset: 100 * index,
-                  index,
-                })}
-              />
+              results.slice(0, 20).map((recipe, index) => (
+                <RecipeCard
+                  key={`${recipe.name}-${index}`}
+                  recipe={recipe}
+                  onPress={() => setSelectedRecipe(recipe)}
+                />
+              ))
             ) : (
               <View style={styles.emptyResults}>
                 <Text style={styles.emptyEmoji}>{'\uD83D\uDD0D'}</Text>
