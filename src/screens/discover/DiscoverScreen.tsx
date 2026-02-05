@@ -73,13 +73,28 @@ export const DiscoverScreen = ({ navigation }: any) => {
     setActiveFilters(new Set());
   };
 
-  // INTERSECTION: only recipes that have ALL active tags
+  // INTERSECTION: only recipes that have ALL active tags, sorted by relevance
   const results = useMemo(() => {
     if (activeFilters.size === 0) return [];
     const filterArr = Array.from(activeFilters);
-    return ALL_RECIPES.filter(recipe =>
+    const filtered = ALL_RECIPES.filter(recipe =>
       filterArr.every(tag => recipe.tags.includes(tag))
     );
+
+    // Sort by relevance based on active goal filters
+    if (activeFilters.has('high-protein')) {
+      filtered.sort((a, b) => b.protein - a.protein);
+    } else if (activeFilters.has('cutting')) {
+      filtered.sort((a, b) => a.calories - b.calories);
+    } else if (activeFilters.has('bulking')) {
+      filtered.sort((a, b) => b.calories - a.calories);
+    } else if (activeFilters.has('pre-workout')) {
+      filtered.sort((a, b) => b.carbs - a.carbs);
+    } else if (activeFilters.has('quick')) {
+      filtered.sort((a, b) => a.time - b.time);
+    }
+
+    return filtered;
   }, [activeFilters]);
 
   const activeLabels = useMemo(() => {

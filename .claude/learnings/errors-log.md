@@ -56,6 +56,34 @@ grep -oP "https://images\.unsplash\.com/[^'?]+" file.ts | sort | uniq -d
 
 ---
 
+## 2024-02-05: Filter Coverage & Sorting Fix
+
+### Fout 6: Onvoldoende filter coverage bij 3-filter combinaties
+**Probleem:** Veel 3-filter combinaties (bijv. dinner + sweet + italian) gaven 0 resultaten.
+**Oorzaak:** Recepten hadden te weinig tags en er waren niet genoeg recepten per niche combinatie.
+**Oplossing:**
+1. fix-tags.js script gemaakt om automatisch tags toe te voegen op basis van nutritionele waarden
+2. 170+ nieuwe recepten toegevoegd verspreid over alle keukens
+3. Multi-tagging strategie: elk recept krijgt ALLE relevante tags (lunch+dinner+snack voor desserts, etc.)
+**Resultaat:** 378 recepten, 378 unieke URLs, ALLE haalbare 2- en 3-filter combinaties 5+ resultaten.
+**Les:**
+- Bij het toevoegen van recepten: gebruik multi-tagging agressief
+- Maak ALTIJD een analyse script om alle combinaties te testen
+- Logisch onmogelijke combinaties (vegan+carnivore, cross-cuisine) zijn OK om 0 te hebben
+
+### Fout 7: Geen sortering op relevantie
+**Probleem:** Resultaten werden niet gesorteerd. Bijv. high-protein filter toonde niet de hoogste protein eerst.
+**Oorzaak:** `results` useMemo filterde alleen, sorteerde niet.
+**Oplossing:** Sortering toegevoegd op basis van actieve goal filters:
+- high-protein → sort op protein (hoog→laag)
+- cutting → sort op calories (laag→hoog)
+- bulking → sort op calories (hoog→laag)
+- pre-workout → sort op carbs (hoog→laag)
+- quick → sort op time (snel→langzaam)
+**Les:** Bij elk filter systeem: denk na over sortering, niet alleen filtering.
+
+---
+
 ## Best Practices Geleerd
 
 1. **Altijd TypeScript check na wijzigingen:** `npx tsc --noEmit`
