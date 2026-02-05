@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback, memo } from 'react';
 import {
   View,
   Text,
@@ -49,7 +49,88 @@ for (const m of MEAL_TYPES) TAG_LABELS[m.id] = m.label;
 for (const g of GOALS) TAG_LABELS[g.id] = g.label;
 for (const c of CUISINES) TAG_LABELS[c.id] = c.label;
 
+// Cuisine IDs for OR logic
+const CUISINE_IDS = new Set(CUISINES.map(c => c.id));
+
 type RecipeItem = DiscoverRecipe;
+
+// Memoized components for performance
+const MealTypeCard = memo(({ item, isActive, onPress }: {
+  item: typeof MEAL_TYPES[0];
+  isActive: boolean;
+  onPress: () => void;
+}) => (
+  <TouchableOpacity
+    style={[styles.mealTypeCard, isActive && styles.mealTypeCardActive]}
+    onPress={onPress}
+    activeOpacity={0.7}
+  >
+    <Image source={{ uri: item.image }} style={styles.mealTypeImage} />
+    <View style={[styles.mealTypeOverlay, isActive && styles.mealTypeOverlayActive]}>
+      <Text style={styles.mealTypeEmoji}>{item.emoji}</Text>
+      <Text style={styles.mealTypeLabel}>{item.label}</Text>
+    </View>
+  </TouchableOpacity>
+));
+
+const GoalCard = memo(({ item, isActive, onPress }: {
+  item: typeof GOALS[0];
+  isActive: boolean;
+  onPress: () => void;
+}) => (
+  <TouchableOpacity
+    style={[styles.goalCard, isActive && styles.goalCardActive]}
+    onPress={onPress}
+    activeOpacity={0.7}
+  >
+    <Text style={styles.goalEmoji}>{item.emoji}</Text>
+    <Text style={styles.goalLabel}>{item.label}</Text>
+  </TouchableOpacity>
+));
+
+const CuisineCard = memo(({ item, isActive, onPress }: {
+  item: typeof CUISINES[0];
+  isActive: boolean;
+  onPress: () => void;
+}) => (
+  <TouchableOpacity
+    style={[styles.cuisineCard, isActive && styles.cuisineCardActive]}
+    onPress={onPress}
+    activeOpacity={0.7}
+  >
+    <Image source={{ uri: item.image }} style={styles.cuisineImage} />
+    <View style={[styles.cuisineOverlay, isActive && styles.cuisineOverlayActive]}>
+      <Text style={styles.cuisineLabel}>{item.label}</Text>
+    </View>
+  </TouchableOpacity>
+));
+
+const RecipeCard = memo(({ recipe, onPress }: {
+  recipe: RecipeItem;
+  onPress: () => void;
+}) => (
+  <TouchableOpacity
+    style={styles.resultCard}
+    onPress={onPress}
+    activeOpacity={0.7}
+  >
+    <Image source={{ uri: recipe.image }} style={styles.resultImage} />
+    <View style={styles.resultInfo}>
+      <Text style={styles.resultName}>{recipe.name}</Text>
+      <Text style={styles.resultDesc} numberOfLines={2}>{recipe.description}</Text>
+      <View style={styles.resultMeta}>
+        <Text style={styles.resultMetaText}>{recipe.calories} kcal</Text>
+        <Text style={styles.resultMetaDot}>{'\u00B7'}</Text>
+        <Text style={styles.resultMetaText}>P: {recipe.protein}g</Text>
+        <Text style={styles.resultMetaDot}>{'\u00B7'}</Text>
+        <Text style={styles.resultMetaText}>C: {recipe.carbs}g</Text>
+        <Text style={styles.resultMetaDot}>{'\u00B7'}</Text>
+        <Text style={styles.resultMetaText}>F: {recipe.fat}g</Text>
+      </View>
+      <Text style={styles.resultTime}>{recipe.time} min</Text>
+    </View>
+  </TouchableOpacity>
+));
 
 export const DiscoverScreen = ({ navigation }: any) => {
   const { user } = useAuth();
@@ -57,7 +138,7 @@ export const DiscoverScreen = ({ navigation }: any) => {
   const [selectedRecipe, setSelectedRecipe] = useState<RecipeItem | null>(null);
   const [isAdding, setIsAdding] = useState(false);
 
-  const toggleFilter = (key: string) => {
+  const toggleFilter = useCallback((key: string) => {
     setActiveFilters(prev => {
       const next = new Set(prev);
       if (next.has(key)) {
@@ -67,19 +148,39 @@ export const DiscoverScreen = ({ navigation }: any) => {
       }
       return next;
     });
-  };
+  }, []);
 
-  const clearAllFilters = () => {
+  const clearAllFilters = useCallback(() => {
     setActiveFilters(new Set());
-  };
+  }, []);
 
-  // INTERSECTION: only recipes that have ALL active tags, sorted by relevance
+  // Filter recipes: cuisines use OR logic (union), other filters use AND (intersection)
   const results = useMemo(() => {
     if (activeFilters.size === 0) return [];
-    const filterArr = Array.from(activeFilters);
-    const filtered = ALL_RECIPES.filter(recipe =>
-      filterArr.every(tag => recipe.tags.includes(tag))
-    );
+
+    // Separate cuisine filters from other filters
+    const cuisineFilters: string[] = [];
+    const otherFilters: string[] = [];
+    activeFilters.forEach(tag => {
+      if (CUISINE_IDS.has(tag)) {
+        cuisineFilters.push(tag);
+      } else {
+        otherFilters.push(tag);
+      }
+    });
+
+    const filtered = ALL_RECIPES.filter(recipe => {
+      // All non-cuisine filters must match (AND)
+      const matchesOther = otherFilters.every(tag => recipe.tags.includes(tag));
+      if (!matchesOther) return false;
+
+      // If cuisines selected, recipe must match at least one (OR)
+      if (cuisineFilters.length > 0) {
+        return cuisineFilters.some(tag => recipe.tags.includes(tag));
+      }
+
+      return true;
+    });
 
     // Sort by relevance based on active goal filters
     if (activeFilters.has('high-protein')) {
@@ -141,23 +242,13 @@ export const DiscoverScreen = ({ navigation }: any) => {
             data={MEAL_TYPES}
             keyExtractor={item => item.id}
             contentContainerStyle={styles.carouselContent}
+            extraData={activeFilters}
             renderItem={({ item }) => (
-              <TouchableOpacity
-                style={[
-                  styles.mealTypeCard,
-                  activeFilters.has(item.id) && styles.mealTypeCardActive,
-                ]}
+              <MealTypeCard
+                item={item}
+                isActive={activeFilters.has(item.id)}
                 onPress={() => toggleFilter(item.id)}
-              >
-                <Image source={{ uri: item.image }} style={styles.mealTypeImage} />
-                <View style={[
-                  styles.mealTypeOverlay,
-                  activeFilters.has(item.id) && styles.mealTypeOverlayActive,
-                ]}>
-                  <Text style={styles.mealTypeEmoji}>{item.emoji}</Text>
-                  <Text style={styles.mealTypeLabel}>{item.label}</Text>
-                </View>
-              </TouchableOpacity>
+              />
             )}
           />
         </View>
@@ -167,17 +258,12 @@ export const DiscoverScreen = ({ navigation }: any) => {
           <Text style={styles.sectionTitle}>Search by Goal</Text>
           <View style={styles.goalsGrid}>
             {GOALS.map(goal => (
-              <TouchableOpacity
+              <GoalCard
                 key={goal.id}
-                style={[
-                  styles.goalCard,
-                  activeFilters.has(goal.id) && styles.goalCardActive,
-                ]}
+                item={goal}
+                isActive={activeFilters.has(goal.id)}
                 onPress={() => toggleFilter(goal.id)}
-              >
-                <Text style={styles.goalEmoji}>{goal.emoji}</Text>
-                <Text style={styles.goalLabel}>{goal.label}</Text>
-              </TouchableOpacity>
+              />
             ))}
           </View>
         </View>
@@ -191,22 +277,13 @@ export const DiscoverScreen = ({ navigation }: any) => {
             data={CUISINES}
             keyExtractor={item => item.id}
             contentContainerStyle={styles.carouselContent}
+            extraData={activeFilters}
             renderItem={({ item }) => (
-              <TouchableOpacity
-                style={[
-                  styles.cuisineCard,
-                  activeFilters.has(item.id) && styles.cuisineCardActive,
-                ]}
+              <CuisineCard
+                item={item}
+                isActive={activeFilters.has(item.id)}
                 onPress={() => toggleFilter(item.id)}
-              >
-                <Image source={{ uri: item.image }} style={styles.cuisineImage} />
-                <View style={[
-                  styles.cuisineOverlay,
-                  activeFilters.has(item.id) && styles.cuisineOverlayActive,
-                ]}>
-                  <Text style={styles.cuisineLabel}>{item.label}</Text>
-                </View>
-              </TouchableOpacity>
+              />
             )}
           />
         </View>
@@ -236,28 +313,11 @@ export const DiscoverScreen = ({ navigation }: any) => {
 
             {results.length > 0 ? (
               results.map((recipe, index) => (
-                <TouchableOpacity
+                <RecipeCard
                   key={`${recipe.name}-${index}`}
-                  style={styles.resultCard}
+                  recipe={recipe}
                   onPress={() => setSelectedRecipe(recipe)}
-                  activeOpacity={0.7}
-                >
-                  <Image source={{ uri: recipe.image }} style={styles.resultImage} />
-                  <View style={styles.resultInfo}>
-                    <Text style={styles.resultName}>{recipe.name}</Text>
-                    <Text style={styles.resultDesc} numberOfLines={2}>{recipe.description}</Text>
-                    <View style={styles.resultMeta}>
-                      <Text style={styles.resultMetaText}>{recipe.calories} kcal</Text>
-                      <Text style={styles.resultMetaDot}>{'\u00B7'}</Text>
-                      <Text style={styles.resultMetaText}>P: {recipe.protein}g</Text>
-                      <Text style={styles.resultMetaDot}>{'\u00B7'}</Text>
-                      <Text style={styles.resultMetaText}>C: {recipe.carbs}g</Text>
-                      <Text style={styles.resultMetaDot}>{'\u00B7'}</Text>
-                      <Text style={styles.resultMetaText}>F: {recipe.fat}g</Text>
-                    </View>
-                    <Text style={styles.resultTime}>{recipe.time} min</Text>
-                  </View>
-                </TouchableOpacity>
+                />
               ))
             ) : (
               <View style={styles.emptyResults}>

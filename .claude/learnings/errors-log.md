@@ -84,6 +84,43 @@ grep -oP "https://images\.unsplash\.com/[^'?]+" file.ts | sort | uniq -d
 
 ---
 
+## 2024-02-05: Broken Photo URLs (KRITIEKE FOUT - HERHAALD)
+
+### Fout 8: 148 van 378 foto URLs werkten niet
+**Probleem:** Veel recepten toonden geen foto omdat de Unsplash URLs ongeldig/verzonnen waren.
+**Oorzaak:** Bij het toevoegen van recepten werden photo IDs verzonnen die niet bestaan op Unsplash.
+**Hoe ontdekt:** `check-urls.js` script dat alle URLs test met HEAD requests.
+**Oplossing:**
+1. Script gemaakt om alle URLs te testen: `check-urls.js`
+2. Broken URLs geëxporteerd naar `broken-urls.json`
+3. Vervangen met GEVERIFIEERDE werkende Unsplash IDs
+
+**WERKENDE UNSPLASH FOOD PHOTO IDs (geverifieerd):**
+```
+hatqfX3b9Vo, kcA-c3f_3FE, fdlZBWIP0aM, MqT0asuoIcU, Fo80DfhsJUk, UC0HZdUitWY,
+-YHSwy6uqvk, IGfIGP5ONV0, ZBSJ57K0Vcg, zcUgjyqEwe8, Mzy-OjtCI70, awj7sRviVXo,
+g4jSyttFc08, eeqbbemH9-c, 4_jhDO54BYg, 1SPu0KT-Ejg, ml49hEv55WI, ZuIDLSz3XLg,
+12eHC6FxPyg, hrlvr2ZlUNk, M9BlQAVJ87M, Yn0l7uwBrpw, TLD6iCOlyb0, HlNcigvUi4Q,
+Q2UWjjskLg4, -GFCYhoRe48, 08bOYnH_r_E, 9aOswReDKPo, 8A08msL7Bus, oaz0raysASk,
+lP5MCM6nZ5A, rAyCBQTH7ws, eMf_iWUBYcY, D-vDQMTfAAU, Yr4n8O_3UPc, ND3edEmzcdQ,
+w6udFN7vybs, 1Shk_PkNkNw, jpkfc5_d-DI, N_Y88TWmGwA
+```
+
+**Les - NOOIT MEER PHOTO IDs VERZINNEN:**
+1. Gebruik ALLEEN geverifieerde IDs uit deze lijst of Unsplash API
+2. Format: `https://images.unsplash.com/photo-{ID}?w=400&h=400&fit=crop`
+3. Test ALTIJD URLs na toevoegen: `node check-urls.js`
+4. Bij nieuwe recepten: hergebruik IDs uit de werkende lijst (duplicaten in URLs zijn OK als recepten anders zijn)
+
+**Check script (check-urls.js):**
+```javascript
+const https = require('https');
+// Test elke URL met HEAD request
+// Broken URLs -> broken-urls.json
+```
+
+---
+
 ## Best Practices Geleerd
 
 1. **Altijd TypeScript check na wijzigingen:** `npx tsc --noEmit`
@@ -91,6 +128,8 @@ grep -oP "https://images\.unsplash\.com/[^'?]+" file.ts | sort | uniq -d
 3. **Test filter coverage:** Maak een test script voor alle combinaties
 4. **Commit atomisch:** Kleine, gefocuste commits met duidelijke messages
 5. **Documenteer wijzigingen:** Update PROGRESS.md of CHANGELOG
+6. **NIEUW: Test foto URLs:** `node check-urls.js` na elke recept toevoeging
+7. **NIEUW: Gebruik alleen geverifieerde Unsplash IDs** - NOOIT verzinnen!
 
 ---
 
